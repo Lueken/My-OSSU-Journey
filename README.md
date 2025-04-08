@@ -11,7 +11,7 @@ The OSSU curriculum provides a complete computer science education using free on
 | Course | Status | Repo Link | Progress | Notes | Completion Date |
 |--------|--------|-----------|-------|-----------------|-|
 | [CS50's Introduction to Computer Science](https://cs50.harvard.edu/x) | In Progress | [Repo](https://github.com/Lueken/CS50-course) | |
-| [CS50's Web Programming with Python and JavaScript](https://cs50.harvard.edu/web/) | Started | [Repo](nacho) | 10% |  |  |
+| [CS50's Web Programming with Python and JavaScript](https://cs50.harvard.edu/web/) | Not Started |  |  |  |  |
 
 ### Core Computer Science
 
