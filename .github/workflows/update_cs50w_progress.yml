@@ -1,4 +1,4 @@
-name: Update CS50 Progress
+name: Update CS50W Progress
 
 on:
   push:
