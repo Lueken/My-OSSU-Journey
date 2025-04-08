@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-CS50W-specific update script for OSSU progress tracking.
-This script specifically looks for CS50W status.json in various possible locations
-and ensures it only updates the CS50W course entry in README.md.
+CS50-specific update script for OSSU progress tracking.
+This script specifically looks for CS50 status.json in various possible locations.
 """
 
 import os
@@ -10,40 +9,40 @@ import json
 import re
 import sys
 
-def find_cs50w_status_file():
+def find_cs50_status_file():
     """
-    Find the CS50W status.json file in various possible locations.
+    Find the CS50 status.json file in various possible locations.
     Returns the path if found, None otherwise.
     """
     possible_paths = [
-        "cs50w/status.json",  # Repository root
-        ".github/scripts/cs50w/status.json",  # Inside .github/scripts
-        os.path.expanduser("~/Documents/GitHub/My-OSSU-Journey/cs50w/status.json"),  # Full path in Documents
-        os.path.expanduser("~/Desktop/GitHub/My-OSSU-Journey/cs50w/status.json")  # Full path on Desktop
+        "cs50/status.json",  # Repository root
+        ".github/scripts/cs50/status.json",  # Inside .github/scripts
+        os.path.expanduser("~/Documents/GitHub/My-OSSU-Journey/cs50/status.json"),  # Full path in Documents
+        os.path.expanduser("~/Desktop/GitHub/My-OSSU-Journey/cs50/status.json")  # Full path on Desktop
     ]
 
-    print("Searching for CS50W status.json file...")
+    print("Searching for CS50 status.json file...")
     for path in possible_paths:
         print(f"Checking path: {path}")
         if os.path.exists(path):
-            print(f"Found CS50W status.json at: {path}")
+            print(f"Found CS50 status.json at: {path}")
             return path
 
-    print("CS50W status.json file not found in any of the expected locations.")
+    print("CS50 status.json file not found in any of the expected locations.")
     return None
 
-def update_cs50w_in_readme(status_file_path):
+def update_cs50_in_readme(status_file_path):
     """
-    Update the README.md with information from the CS50W status.json file.
+    Update the README.md with information from the CS50 status.json file.
 
     Args:
-        status_file_path: Path to the CS50W status.json file
+        status_file_path: Path to the CS50 status.json file
     """
-    print(f"Starting update process for CS50W using status file: {status_file_path}")
+    print(f"Starting update process for CS50 using status file: {status_file_path}")
 
     # Read the README.md file
     try:
-        with open("README.md", "r", encoding="utf-8") as f:
+        with open("../../README.md", "r", encoding="utf-8") as f:
             readme_content = f.read()
         print("Successfully read README.md")
     except Exception as e:
@@ -83,15 +82,15 @@ def update_cs50w_in_readme(status_file_path):
                 readme_content = readme_content.replace(table, updated_table)
 
         # Save the updated README with the new column
-        with open("README.md", "w", encoding="utf-8") as f:
+        with open("../../README.md", "w", encoding="utf-8") as f:
             f.write(readme_content)
         print("Added Progress column to README tables")
 
         # Read the updated content
-        with open("README.md", "r", encoding="utf-8") as f:
+        with open("../../README.md", "r", encoding="utf-8") as f:
             readme_content = f.read()
 
-    # Read the CS50W status.json file
+    # Read the CS50 status.json file
     try:
         with open(status_file_path, "r", encoding="utf-8") as f:
             status_data = json.load(f)
@@ -122,19 +121,21 @@ def update_cs50w_in_readme(status_file_path):
         # Prepare repository link text
         repo_text = f"[Repo]({repo_link})" if repo_link else ""
 
-        # Define search terms specific to CS50W
+        # Define search terms specific to CS50 (but NOT CS50W)
+        # We'll use more precise patterns to avoid matching CS50W
         search_terms = []
 
         # Add the exact course name from status.json
         if course_name:
             search_terms.append(course_name)
 
-        # Add CS50W-specific search terms
-        search_terms.append("CS50's Web Programming")
-        search_terms.append("CS50W")
-        search_terms.append("Web Programming with Python and JavaScript")
+        # Add CS50-specific search terms but be more precise
+        search_terms.append("CS50's Introduction to Computer Science")
 
-        # Search for CS50W in the README
+        # Be careful with just "CS50" - we'll use a more specific regex pattern
+        # for this one to ensure we don't match CS50W
+
+        # Search for CS50 in the README
         found = False
 
         for term in search_terms:
@@ -162,10 +163,9 @@ def update_cs50w_in_readme(status_file_path):
                     full_match = match.group(0)
                     course_part = match.group(1).strip()
 
-                    # Make sure this is actually CS50W and not just CS50
-                    # Either "CS50W" or "Web Programming" should be in the course part
-                    if "CS50W" not in course_part and "Web Programming" not in course_part:
-                        print(f"Skipping match that appears to be regular CS50, not CS50W: '{course_part}'")
+                    # Skip if this is clearly CS50W (to avoid confusion)
+                    if "CS50W" in course_part or "Web Programming" in course_part:
+                        print(f"Skipping match that appears to be CS50W: '{course_part}'")
                         continue
 
                     status_part = match.group(2).strip()
@@ -180,20 +180,14 @@ def update_cs50w_in_readme(status_file_path):
                         notes_part = match.group(4).strip()
                         completion_part = match.group(5).strip()
 
-                        # Use notes from status.json if provided, otherwise keep existing notes
-                        final_notes = notes if notes else notes_part
-
-                        new_line = f"| {course_part} | {status} | {repo_text} | {final_notes} | {completion_date} |"
+                        new_line = f"| {course_part} | {status} | {repo_text} | {notes} | {completion_date} |"
                     else:
                         # New format with Progress column
                         progress_part = match.group(4).strip()
                         notes_part = match.group(5).strip()
                         completion_part = match.group(6).strip()
 
-                        # Use notes from status.json if provided, otherwise keep existing notes
-                        final_notes = notes if notes else notes_part
-
-                        new_line = f"| {course_part} | {status} | {repo_text} | {progress_text} | {final_notes} | {completion_date} |"
+                        new_line = f"| {course_part} | {status} | {repo_text} | {progress_text} | {notes} | {completion_date} |"
 
                     print(f"New line: '{new_line}'")
 
@@ -205,15 +199,74 @@ def update_cs50w_in_readme(status_file_path):
             if found:
                 break
 
+        # If no match found with the terms, try a more specific approach for just "CS50"
         if not found:
-            print(f"WARNING: Could not find CS50W course in README")
+            print("Trying specific CS50 pattern that excludes CS50W...")
+
+            # Look for CS50 but not CS50W using a more specific pattern
+            # This pattern matches "CS50" not followed by "W"
+            cs50_pattern = r'\|(.*CS50(?!W)[^\|]*)\|(.*?)\|(.*?)\|(.*?)\|(.*?)\|(.*?)\|'
+            alt_cs50_pattern = r'\|(.*CS50(?!W)[^\|]*)\|(.*?)\|(.*?)\|(.*?)\|(.*?)\|'
+
+            # Try the full pattern first (with Progress column)
+            matches = list(re.finditer(cs50_pattern, readme_content, re.MULTILINE))
+
+            # If no match found, try the alternative pattern (without Progress column)
+            if not matches:
+                matches = list(re.finditer(alt_cs50_pattern, readme_content, re.MULTILINE))
+                use_alt_pattern = True
+            else:
+                use_alt_pattern = False
+
+            if matches:
+                print(f"Found {len(matches)} matches with specific CS50 pattern")
+
+                for match in matches:
+                    full_match = match.group(0)
+                    course_part = match.group(1).strip()
+
+                    # Double check that this is not CS50W
+                    if "CS50W" in course_part or "Web Programming" in course_part:
+                        print(f"Skipping match that appears to be CS50W: '{course_part}'")
+                        continue
+
+                    status_part = match.group(2).strip()
+                    repo_part = match.group(3).strip()
+
+                    print(f"Original match: '{full_match}'")
+
+                    # Create replacement line based on pattern used
+                    if use_alt_pattern:
+                        # Old format without Progress column
+                        progress_part = ""  # Not in the pattern
+                        notes_part = match.group(4).strip()
+                        completion_part = match.group(5).strip()
+
+                        new_line = f"| {course_part} | {status} | {repo_text} | {notes} | {completion_date} |"
+                    else:
+                        # New format with Progress column
+                        progress_part = match.group(4).strip()
+                        notes_part = match.group(5).strip()
+                        completion_part = match.group(6).strip()
+
+                        new_line = f"| {course_part} | {status} | {repo_text} | {progress_text} | {notes} | {completion_date} |"
+
+                    print(f"New line: '{new_line}'")
+
+                    # Replace the line in the README
+                    readme_content = readme_content.replace(full_match, new_line)
+                    found = True
+                    break
+
+        if not found:
+            print(f"WARNING: Could not find CS50 course in README")
             return
 
         # Write the updated README
         try:
-            with open("README.md", "w", encoding="utf-8") as f:
+            with open("../../README.md", "w", encoding="utf-8") as f:
                 f.write(readme_content)
-            print(f"SUCCESS: README.md updated successfully for CS50W!")
+            print(f"SUCCESS: README.md updated successfully for CS50!")
         except Exception as e:
             print(f"ERROR: Could not write to README.md: {e}")
 
@@ -228,11 +281,11 @@ if __name__ == "__main__":
         status_file_path = sys.argv[1]
         print(f"Using provided path: {status_file_path}")
     else:
-        # Try to find the CS50W status.json file automatically
-        status_file_path = find_cs50w_status_file()
+        # Try to find the CS50 status.json file automatically
+        status_file_path = find_cs50_status_file()
 
         if not status_file_path:
-            print("ERROR: Could not find CS50W status.json file. Please provide the path as an argument.")
+            print("ERROR: Could not find CS50 status.json file. Please provide the path as an argument.")
             sys.exit(1)
 
-    update_cs50w_in_readme(status_file_path)
+    update_cs50_in_readme(status_file_path)
