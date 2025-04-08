@@ -1,10 +1,10 @@
 {
   "course_name": "CS50's Introduction to Computer Science",
-  "status": "Not Started",
+  "status": "In Progress",
   "progress_percentage": 0,
-  "start_date": "",
+  "start_date": "2025-04-08",
   "completion_date": "",
-  "repo_link": "",
-  "notes": "",
+  "repo_link": "https://github.com/Lueken/CS50-course",
+  "notes": "Started tracking the course as part of my OSSU journey",
   "last_updated": "2025-04-08"
 }
